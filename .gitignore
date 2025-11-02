@@ -1,0 +1,23 @@
+# --- ENVIRONMENTS ---
+.venv/
+env/
+venv/
+
+# --- PYTHON BUILD / CACHE ---
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pkl
+*.log
+
+# --- NOTEBOOKS / TEMP FILES ---
+.ipynb_checkpoints/
+*.tmp
+*.bak
+
+# --- OS / IDE FILES ---
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
