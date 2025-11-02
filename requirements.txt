@@ -29,3 +29,5 @@ transformers
 datasets
 accelerate
 evaluate
+
+xgboost
