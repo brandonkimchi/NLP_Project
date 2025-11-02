@@ -1,93 +1,88 @@
+# src/training.py
 import os
-import pandas as pd
 from pathlib import Path
+import joblib
+import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, accuracy_score, f1_score
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.naive_bayes import ComplementNB
 from sklearn.pipeline import Pipeline
-import joblib
-
 
 def build_models():
-    """Return a dictionary of classic model pipelines."""
-    models = {
-        # Bag-of-Words
+    """Classic baselines: BoW/TF-IDF × {LogReg, ComplementNB}."""
+    return {
+        # Bag of Words
         "bow_lr": Pipeline([
-            ("vect", CountVectorizer(max_features=50000, ngram_range=(1, 2))),
+            ("vect", CountVectorizer(max_features=50_000, ngram_range=(1, 2))),
             ("clf", LogisticRegression(max_iter=2000, n_jobs=-1))
         ]),
         "bow_nb": Pipeline([
-            ("vect", CountVectorizer(max_features=50000, ngram_range=(1, 2))),
+            ("vect", CountVectorizer(max_features=50_000, ngram_range=(1, 2))),
             ("clf", ComplementNB())
         ]),
-
         # TF-IDF
         "tfidf_lr": Pipeline([
-            ("vect", TfidfVectorizer(max_features=50000, ngram_range=(1, 2))),
+            ("vect", TfidfVectorizer(max_features=50_000, ngram_range=(1, 2))),
             ("clf", LogisticRegression(max_iter=2000, n_jobs=-1))
         ]),
         "tfidf_nb": Pipeline([
-            ("vect", TfidfVectorizer(max_features=50000, ngram_range=(1, 2))),
+            ("vect", TfidfVectorizer(max_features=50_000, ngram_range=(1, 2))),
             ("clf", ComplementNB())
         ]),
     }
-    return models
 
+def train_eval(name, model, X_tr, y_tr, X_va, y_va, X_te, y_te, out_dir):
+    """Fit on TRAIN, report on VAL and TEST, then save."""
+    print(f"\n========== {name} ==========")
+    model.fit(X_tr, y_tr)
 
-def evaluate_model(name, model, X_val, y_val, X_test, y_test, out_dir):
-    """Fit model, print metrics, and save."""
-    print(f"\n{'='*10} Training {name} {'='*10}")
-    model.fit(X_val, y_val)
+    print("\nValidation results:")
+    va_pred = model.predict(X_va)
+    print(classification_report(y_va, va_pred, digits=4))
 
-    print("\nValidation Results:")
-    val_pred = model.predict(X_val)
-    print(classification_report(y_val, val_pred, digits=4))
+    print("\nTest results:")
+    te_pred = model.predict(X_te)
+    print(classification_report(y_te, te_pred, digits=4))
 
-    print("\nTest Results:")
-    test_pred = model.predict(X_test)
-    print(classification_report(y_test, test_pred, digits=4))
+    acc = accuracy_score(y_te, te_pred)
+    f1  = f1_score(y_te, te_pred, average="macro")
 
-    acc = accuracy_score(y_test, test_pred)
-    f1 = f1_score(y_test, test_pred, average="macro")
-
-    # Save model
     Path(out_dir).mkdir(parents=True, exist_ok=True)
     path = os.path.join(out_dir, f"{name}.joblib")
     joblib.dump(model, path)
-    print(f"Saved model -> {path}")
+    print(f"Saved -> {path}")
 
     return {"model": name, "test_acc": acc, "test_f1": f1}
-
 
 def main():
     data_path = "data/IMDB_clean.csv"
     out_dir = "models"
+
     df = pd.read_csv(data_path)
-    print(f"Loaded {len(df)} samples from {data_path}")
+    if not {"text", "label"}.issubset(df.columns):
+        raise KeyError(f"{data_path} must have columns: text,label")
+    X, y = df["text"], df["label"].astype(int)
 
-    X = df["text"]
-    y = df["label"]
-
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, stratify=y, random_state=42
+    # Train / Test split
+    X_tr, X_te, y_tr, y_te = train_test_split(
+        X, y, test_size=0.20, stratify=y, random_state=42
     )
-    X_train, X_val, y_train, y_val = train_test_split(
-        X_train, y_train, test_size=0.1, stratify=y_train, random_state=42
+    # Train / Val split
+    X_tr, X_va, y_tr, y_va = train_test_split(
+        X_tr, y_tr, test_size=0.10, stratify=y_tr, random_state=42
     )
 
-    results = []
     models = build_models()
-
+    results = []
     for name, model in models.items():
-        res = evaluate_model(name, model, X_train, y_train, X_test, y_test, out_dir)
+        res = train_eval(name, model, X_tr, y_tr, X_va, y_va, X_te, y_te, out_dir)
         results.append(res)
 
-    print("\n=== Summary ===")
+    print("\n=== Summary (Test) ===")
     for r in results:
         print(f"{r['model']:10s}  ACC={r['test_acc']:.4f}  F1={r['test_f1']:.4f}")
-
 
 if __name__ == "__main__":
     main()
