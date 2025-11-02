@@ -21,3 +21,6 @@ __pycache__/
 Thumbs.db
 .vscode/
 .idea/
+
+# --- MODEL FILES ---
+models/
