@@ -25,3 +25,6 @@ Thumbs.db
 # --- MODEL FILES ---
 models/
 models_ensemble/
+results/
+logs/
+final_model/

@@ -31,3 +31,8 @@ accelerate
 evaluate
 
 xgboost
+seaborn
+tensorflow
+tf-keras
+transformers
+hf_xet
