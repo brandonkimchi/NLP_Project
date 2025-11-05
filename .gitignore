@@ -1,0 +1,33 @@
+# --- ENVIRONMENTS ---
+.venv/
+env/
+venv/
+
+# --- PYTHON BUILD / CACHE ---
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pkl
+*.log
+
+# --- NOTEBOOKS / TEMP FILES ---
+.ipynb_checkpoints/
+*.tmp
+*.bak
+
+# --- OS / IDE FILES ---
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# --- MODEL FILES ---
+models/
+models_ensemble/
+results/
+logs/
+final_model/
+
+data/glove.6B.100d.txt
+data/glove6B.zip
