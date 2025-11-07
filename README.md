@@ -70,7 +70,7 @@ Training split: **72% train / 8% validation / 20% test**
 
 | Method | Score (/10) |
 |---------|-------------|
-| Supervised Micro Average | 7.87 |
+| Supervised Micro Average | 7.85 |
 | Unsupervised Macro-by-Cluster | 7.87 |
 | Uncertainty-Weighted | 8.25 |
 | Silhouette-Weighted | 7.85 |
