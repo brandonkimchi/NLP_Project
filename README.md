@@ -95,5 +95,3 @@ Training split: **72% train / 8% validation / 20% test**
 
 ---
 
-## 🧭 Repository Structure
-
